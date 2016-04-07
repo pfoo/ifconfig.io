@@ -57,6 +57,12 @@
             <div class="col-sm-3">MIME Type</div><div class="col-sm-9">{{ .mime }}</div>
           </li>
           <li class="list-group-item">
+            <div class="col-sm-3">Cache-control</div><div class="col-sm-9">{{ .cache }}</div>
+          </li>
+          <li class="list-group-item">
+            <div class="col-sm-3">Do Not Track</div><div class="col-sm-9">{{ .dnt }}</div>
+          </li>
+          <li class="list-group-item">
             <div class="col-sm-3">Charset</div><div class="col-sm-9">{{ .charset }}</div>
           </li>
           <li class="list-group-item">
@@ -104,6 +110,12 @@
           </li>
           <li class="list-group-item">
             <div class="col-sm-4">$ curl ifconfig.io/mime</div><div class="col-sm-8">{{ .mime }}</div>
+          </li>
+          <li class="list-group-item">
+            <div class="col-sm-4">$ curl ifconfig.io/cache</div><div class="col-sm-8">{{ .cache }}</div>
+          </li>
+          <li class="list-group-item">
+            <div class="col-sm-4">$ curl ifconfig.io/dnt</div><div class="col-sm-8">{{ .dnt }}</div>
           </li>
           <li class="list-group-item">
             <div class="col-sm-4">$ curl ifconfig.io/charset</div><div class="col-sm-8">{{ .charset }}</div>

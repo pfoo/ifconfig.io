@@ -68,9 +68,24 @@ func mainHandler(c *gin.Context) {
 		c.Abort()
 	}
 
+	//proxy handling stuff
+
+	// use CF-Connecting-IP header as ip if available (this means app is invoked behind a proxy)
 	cfIP := net.ParseIP(c.Request.Header.Get("CF-Connecting-IP"))
 	if cfIP != nil {
 		ip.IP = cfIP
+	}
+
+	// use CF-Connecting-PORT header as source port if available (this means app is invoked behind a proxy)
+	cfPORT := c.Request.Header.Get("CF-Connecting-PORT")
+	if cfPORTnum, err := strconv.Atoi(cfPORT); err == nil {
+		ip.Port = cfPORTnum
+	}
+
+	// Use CF-Connection header instead of HTTP Connection header if available (this means app is invoked behind a proxy)
+	ConnectionHeader := c.Request.Header.Get("Connection")
+	if cfCONN := c.Request.Header.Get("CF-Connection"); cfCONN != "" {
+		ConnectionHeader = cfCONN
 	}
 
 	if fields[0] == "porttest" {
@@ -89,11 +104,15 @@ func mainHandler(c *gin.Context) {
 	c.Set("ip", ip.IP.String())
 	c.Set("port", ip.Port)
 	c.Set("ua", c.Request.UserAgent())
+	c.Set("protocol", c.Request.Proto)
 	c.Set("lang", c.Request.Header.Get("Accept-Language"))
 	c.Set("encoding", c.Request.Header.Get("Accept-Encoding"))
 	c.Set("method", c.Request.Method)
+	c.Set("connection", ConnectionHeader)
 	c.Set("mime", c.Request.Header.Get("Accept"))
+	c.Set("charset", c.Request.Header.Get("Accept-Charset"))
 	c.Set("referer", c.Request.Header.Get("Referer"))
+	c.Set("via", c.Request.Header.Get("Via"))
 	c.Set("forwarded", c.Request.Header.Get("X-Forwarded-For"))
 	c.Set("country_code", c.Request.Header.Get("CF-IPCountry"))
 

@@ -33,6 +33,9 @@
             <div class="col-sm-3">User Agent</div><div class="col-sm-9">{{ .ua }}</div>
           </li>
           <li class="list-group-item">
+            <div class="col-sm-3">Protocol</div><div class="col-sm-9">{{ .protocol }}</div>
+          </li>
+          <li class="list-group-item">
             <div class="col-sm-3">Port</div><div class="col-sm-9">{{ .port }}</div>
           </li>
           <li class="list-group-item">
@@ -45,10 +48,19 @@
             <div class="col-sm-3">Method</div><div class="col-sm-9">{{ .method }}</div>
           </li>
           <li class="list-group-item">
+            <div class="col-sm-3">Connection</div><div class="col-sm-9">{{ .connection }}</div>
+          </li>
+          <li class="list-group-item">
             <div class="col-sm-3">Encoding</div><div class="col-sm-9">{{ .encoding }}</div>
           </li>
           <li class="list-group-item">
             <div class="col-sm-3">MIME Type</div><div class="col-sm-9">{{ .mime }}</div>
+          </li>
+          <li class="list-group-item">
+            <div class="col-sm-3">Charset</div><div class="col-sm-9">{{ .charset }}</div>
+          </li>
+          <li class="list-group-item">
+            <div class="col-sm-3">Via</div><div class="col-sm-9">{{ .via }}</div>
           </li>
           <li class="list-group-item">
             <div class="col-sm-3">X-Forwarded-For</div><div class="col-sm-9">{{ .forwarded }}</div>
@@ -76,16 +88,28 @@
             <div class="col-sm-4">$ curl ifconfig.io/ua</div><div class="col-sm-8">{{ .ua }}</div>
           </li>
           <li class="list-group-item">
+            <div class="col-sm-4">$ curl ifconfig.io/protocol</div><div class="col-sm-8">{{ .protocol }}</div>
+          </li>
+          <li class="list-group-item">
             <div class="col-sm-4">$ curl ifconfig.io/port</div><div class="col-sm-8">{{ .port }}</div>
           </li>
           <li class="list-group-item">
             <div class="col-sm-4">$ curl ifconfig.io/lang</div><div class="col-sm-8">{{ .lang }}</div>
           </li>
           <li class="list-group-item">
+            <div class="col-sm-4">$ curl ifconfig.io/connection</div><div class="col-sm-8">{{ .connection }}</div>
+          </li>
+          <li class="list-group-item">
             <div class="col-sm-4">$ curl ifconfig.io/encoding</div><div class="col-sm-8">{{ .encoding }}</div>
           </li>
           <li class="list-group-item">
             <div class="col-sm-4">$ curl ifconfig.io/mime</div><div class="col-sm-8">{{ .mime }}</div>
+          </li>
+          <li class="list-group-item">
+            <div class="col-sm-4">$ curl ifconfig.io/charset</div><div class="col-sm-8">{{ .charset }}</div>
+          </li>
+          <li class="list-group-item">
+            <div class="col-sm-4">$ curl ifconfig.io/via</div><div class="col-sm-8">{{ .via }}</div>
           </li>
           <li class="list-group-item">
             <div class="col-sm-4">$ curl ifconfig.io/forwarded</div><div class="col-sm-8">{{ .forwarded }}</div>

@@ -119,7 +119,7 @@ func mainHandler(c *gin.Context) {
 	ua := strings.Split(c.Request.UserAgent(), "/")
 
 	// Only lookup hostname if the results are going to need it.
-	if stringInSlice(fields[0], []string{"all", "host"}) || (fields[0] == "" && ua[0] != "curl") {
+	if stringInSlice(fields[0], []string{"all", "host"}) || (fields[0] == "" && ua[0] != "curl" && ua[0] != "Wget" && ua[0] != "fetch") {
 		hostnames, err := net.LookupAddr(ip.IP.String())
 		if err != nil {
 			c.Set("host", "")
@@ -135,8 +135,8 @@ func mainHandler(c *gin.Context) {
 
 	switch fields[0] {
 	case "":
-		//If the user is using curl, then we should just return the IP, else we show the home page.
-		if ua[0] == "curl" {
+		//If the user is using curl, wget or fetch, then we should just return the IP, else we show the home page.
+		if ua[0] == "curl" || ua[0] == "Wget" || ua[0] == "fetch" {
 			c.String(200, fmt.Sprintln(ip.IP))
 		} else {
 			c.HTML(200, "index.html", c.Keys)

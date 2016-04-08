@@ -1,6 +1,18 @@
 
-# ifconfig.io
-[![Build Status](https://drone.io/github.com/georgyo/ifconfig.io/status.png)](https://drone.io/github.com/georgyo/ifconfig.io/latest)
+# ifconfig.pm
+
+This is a slightly modified version of https://github.com/georgyo/ifconfig.io :
+* Support for HTTP Connection, Charset, Via, Do-Not-Track and Cache-Control headers
+* Added a way to support real client port when the app is run behind a proxy
+* wget and fetch are treated like curl (providing value without html formating)
+
+Build instruction :
+* 
+
+Running behind a proxy :
+* 
+
+ORIGINAL README FROM https://github.com/georgyo/ifconfig.io
 
 Inspired by ifconfig.me, but designed for pure speed. A single server can do 18,000 requests per seconds while only consuming 50megs of ram.
 

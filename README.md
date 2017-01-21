@@ -11,6 +11,7 @@ This is a slightly modified version of https://github.com/georgyo/ifconfig.io :
 Build instruction :
 * install golang-go
 * git clone https://github.com/pfoo/ifconfig.pm.git
+* git checkout experimental-geogo
 * cd ifconfig.pm
 * export GOPATH="`pwd`"
 * go get -d -v

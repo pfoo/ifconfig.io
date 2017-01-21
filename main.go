@@ -114,7 +114,7 @@ func mainHandler(c *gin.Context) {
 	c.Set("referer", c.Request.Header.Get("Referer"))
 	c.Set("via", c.Request.Header.Get("Via"))
 	c.Set("forwarded", c.Request.Header.Get("X-Forwarded-For"))
-	c.Set("country_code", c.Request.Header.Get("CF-IPCountry"))
+	c.Set("country", c.Request.Header.Get("CF-IPCountry"))
 	r := strings.NewReplacer("0", "No", "1", "Yes")
 	c.Set("dnt", r.Replace(c.Request.Header.Get("DNT")))
 	c.Set("cache", c.Request.Header.Get("cache-control"))

@@ -6,6 +6,7 @@ This is a slightly modified version of https://github.com/georgyo/ifconfig.io :
 * Added Protocol field
 * Added a way to support real client port when the app is run behind a proxy
 * wget and fetch are treated like curl (providing value without html formating)
+* show IP country and AS number based on Maxmind geolite free database, using https://github.com/abh/geoip
 
 Build instruction :
 * install golang-go
@@ -15,10 +16,15 @@ Build instruction :
 * go get -d -v
 * go build
 
-A few parameters can be defined using export :
+A few parameters can be defined using export before launching the binary :
 * export GIN_MODE=debug|release
 * export PORT="8081"
 * export HOST="127.0.0.1"
+
+Required for ip country and asn support :
+* apt-get install geoip-bin geoip-database-contrib
+* geoip-database-contrib_update
+* You might need to adjust geoip databases location in main.go (lines 20-23) if you are not running debian
 
 Running behind a proxy (usefull if you already have a webserver running on port 80) :
 * Run the go program on 127.0.0.1:8081
@@ -27,7 +33,6 @@ Running behind a proxy (usefull if you already have a webserver running on port 
 	CF-Connecting-IP : The IP address the client is connecting from. Important or the IP will be wrong.<br>
 	CF-Connecting-PORT : The port the client is connecting from. Important or the PORT will be wrong.<br>
 	CF-Connection : HTTP_CONNECTION header sent by the client to the proxy<br>
-	CF-IPCountry : The client geoip (using apache geoip module for example)
 * See example apache.conf
 
 #### ORIGINAL README FROM https://github.com/georgyo/ifconfig.io :

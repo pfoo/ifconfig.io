@@ -14,7 +14,16 @@ import (
 	"github.com/brandfolder/gin-gorelic"
 	"github.com/coreos/go-systemd/activation"
 	"github.com/gin-gonic/gin"
+	"github.com/pfoo/geoip"
 )
+
+var gi, gierr = geoip.Open("/usr/share/GeoIP/GeoIP.dat")
+var gi6, gi6err = geoip.Open("/usr/share/GeoIP/GeoIPv6.dat")
+var giasn, giasnerr = geoip.Open("/usr/share/GeoIP/GeoIPASNum.dat")
+var giasn6, giasn6err = geoip.Open("/usr/share/GeoIP/GeoIPASNumv6.dat")
+//if err != nil {
+//	fmt.Printf("Could not open GeoIPASN database: %s\n", err)
+//}
 
 // Logger is a simple log handler, out puts in the standard of apache access log common.
 // See http://httpd.apache.org/docs/2.2/logs.html#accesslog
@@ -88,6 +97,30 @@ func mainHandler(c *gin.Context) {
 		ConnectionHeader = cfCONN
 	}
 
+	//  AS Number and country name stuff
+	var geoip_country, geoip_asn string
+	if strings.Contains(ip.IP.String(), ".") {
+		country, netmask := gi.GetCountryName(ip.IP.String())
+		if netmask != 0 {
+			geoip_country = country
+		}
+		asn, netmask := giasn.GetName(ip.IP.String())
+		if netmask != 0 {
+			geoip_asn = asn
+		}
+	} else {
+		country, netmask := gi6.GetCountryName_v6(ip.IP.String())
+		if netmask != 0 {
+			geoip_country = country
+		}
+		asn, netmask := giasn6.GetNameV6(ip.IP.String())
+		if netmask != 0 {
+			geoip_asn = asn
+		}
+	}
+	//print(geoip_country)
+	//print(geoip_asn)
+
 	if fields[0] == "porttest" {
 		if len(fields) >= 2 {
 			if port, err := strconv.Atoi(fields[1]); err == nil && port > 0 && port <= 65535 {
@@ -114,10 +147,12 @@ func mainHandler(c *gin.Context) {
 	c.Set("referer", c.Request.Header.Get("Referer"))
 	c.Set("via", c.Request.Header.Get("Via"))
 	c.Set("forwarded", c.Request.Header.Get("X-Forwarded-For"))
-	c.Set("country", c.Request.Header.Get("CF-IPCountry"))
+	//c.Set("country", c.Request.Header.Get("CF-IPCountry")) //determine country using provided header
+	c.Set("country", geoip_country)
 	r := strings.NewReplacer("0", "No", "1", "Yes")
 	c.Set("dnt", r.Replace(c.Request.Header.Get("DNT")))
 	c.Set("cache", c.Request.Header.Get("cache-control"))
+	c.Set("asn", geoip_asn)
 
 	ua := strings.Split(c.Request.UserAgent(), "/")
 

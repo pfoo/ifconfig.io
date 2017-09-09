@@ -1,6 +1,13 @@
 
 # ifconfig.pm
 
+## What's new in this branch ?
+* Geolocation : uses geogo (from https://github.com/pfoo/geoip) instead of apache geoip module and headers
+* Provide ASN using geogo (from https://github.com/pfoo/geoip)
+* use real protocol if running behind a proxy
+
+## README
+
 This is a slightly modified version of https://github.com/georgyo/ifconfig.io :
 * Support for HTTP Connection, Charset, Via, Do-Not-Track and Cache-Control headers
 * Added Protocol field
@@ -34,6 +41,7 @@ Running behind a proxy (usefull if you already have a webserver running on port 
 	CF-Connecting-IP : The IP address the client is connecting from. Important or the IP will be wrong.<br>
 	CF-Connecting-PORT : The port the client is connecting from. Important or the PORT will be wrong.<br>
 	CF-Connection : HTTP_CONNECTION header sent by the client to the proxy<br>
+	CF-Protocol : The HTTP protocol the client is connecting with. Important or the displayed protocol will be wrong.<br>
 * See example apache.conf
 
 #### ORIGINAL README FROM https://github.com/georgyo/ifconfig.io :

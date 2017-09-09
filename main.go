@@ -121,6 +121,12 @@ func mainHandler(c *gin.Context) {
 	//print(geoip_country)
 	//print(geoip_asn)
 
+	// Use CF-Protocol header as protocol if available instead default gathered protocol (this means app is invoked behind a proxy)
+	Protocol := c.Request.Proto
+	if cfProto := c.Request.Header.Get("CF-Protocol"); cfProto != "" {
+		Protocol = cfProto
+	}
+
 	if fields[0] == "porttest" {
 		if len(fields) >= 2 {
 			if port, err := strconv.Atoi(fields[1]); err == nil && port > 0 && port <= 65535 {
@@ -137,7 +143,7 @@ func mainHandler(c *gin.Context) {
 	c.Set("ip", ip.IP.String())
 	c.Set("port", ip.Port)
 	c.Set("ua", c.Request.UserAgent())
-	c.Set("protocol", c.Request.Proto)
+	c.Set("protocol", Protocol)
 	c.Set("lang", c.Request.Header.Get("Accept-Language"))
 	c.Set("encoding", c.Request.Header.Get("Accept-Encoding"))
 	c.Set("method", c.Request.Method)

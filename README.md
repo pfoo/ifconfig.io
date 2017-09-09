@@ -10,7 +10,7 @@
 
 This is a slightly modified version of https://github.com/georgyo/ifconfig.io :
 * Support for HTTP Connection, Charset, Via, Do-Not-Track and Cache-Control headers
-* Added Protocol field
+* Added Protocol field and a way of displaying the original protocol if running behind a proxy 
 * Added a way to support real client port when the app is run behind a proxy
 * wget and fetch are treated like curl (providing value without html formating)
 * show IP country and AS number based on Maxmind geolite free database, using https://github.com/abh/geoip

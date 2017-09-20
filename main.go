@@ -17,6 +17,7 @@ import (
 	"github.com/pfoo/geoip"
 )
 
+// Those files are provided by debian/ubuntu package geoip-database-contrib (geoip-database or geoip-database-extra wont work)
 var gi, gierr = geoip.Open("/usr/share/GeoIP/GeoIP.dat")
 var gi6, gi6err = geoip.Open("/usr/share/GeoIP/GeoIPv6.dat")
 var giasn, giasnerr = geoip.Open("/usr/share/GeoIP/GeoIPASNum.dat")

@@ -21,9 +21,6 @@ var gi, gierr = geoip.Open("/usr/share/GeoIP/GeoIP.dat")
 var gi6, gi6err = geoip.Open("/usr/share/GeoIP/GeoIPv6.dat")
 var giasn, giasnerr = geoip.Open("/usr/share/GeoIP/GeoIPASNum.dat")
 var giasn6, giasn6err = geoip.Open("/usr/share/GeoIP/GeoIPASNumv6.dat")
-//if err != nil {
-//	fmt.Printf("Could not open GeoIPASN database: %s\n", err)
-//}
 
 // Logger is a simple log handler, out puts in the standard of apache access log common.
 // See http://httpd.apache.org/docs/2.2/logs.html#accesslog
@@ -220,6 +217,24 @@ func FileServer(root string) gin.HandlerFunc {
 }
 
 func main() {
+
+	if gierr != nil {
+		fmt.Fprintf(os.Stderr, "error: Could not open GeoIP database: %v\n")
+		os.Exit(1)
+	}
+	if gi6err != nil {
+		fmt.Fprintf(os.Stderr, "error: Could not open GeoIPv6 database: %v\n")
+		os.Exit(1)
+	}
+	if giasnerr != nil {
+		fmt.Fprintf(os.Stderr, "error: Could not open GeoIP ASN database: %v\n")
+		os.Exit(1)
+	}
+	if giasn6err != nil {
+		fmt.Fprintf(os.Stderr, "error: Could not open GeoIPv6 ASN database: %v\n")
+		os.Exit(1)
+	}
+
 	r := gin.New()
 	r.Use(gin.Recovery())
 	r.Use(Logger())

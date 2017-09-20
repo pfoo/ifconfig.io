@@ -16,7 +16,7 @@ This is a slightly modified version of https://github.com/georgyo/ifconfig.io :
 * show IP country and AS number based on Maxmind geolite free database, using https://github.com/abh/geoip
 
 Build instruction :
-* install golang-go
+* install golang-go and libgeoip-dev
 * git clone https://github.com/pfoo/ifconfig.pm.git
 * git checkout experimental-geogo
 * cd ifconfig.pm

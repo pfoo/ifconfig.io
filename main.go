@@ -213,7 +213,7 @@ func main() {
 	}(errc)
 
 	// Listen on whatever systemd tells us to.
-	listeners, err := activation.Listeners(true)
+	listeners, err := activation.Listeners()
 	if err != nil {
 		fmt.Printf("Could not get systemd listerns with err %q", err)
 	}

@@ -2,12 +2,8 @@
 # ifconfig.pm
 
 ## What's new in this branch ?
-* Geolocation : uses geogo (from https://github.com/pfoo/geoip) instead of apache geoip module and headers
-* Provide ASN using geogo (from https://github.com/pfoo/geoip)
+* Uses MaxMind GeoLite2 (via https://github.com/oschwald/maxminddb-golang) in order to provide GeoIP Country and ASN.
 * use real protocol if running behind a proxy
-
-Please note that as GeoIP / GeoLite Legacy databases are no more provided by MaxMind as off 2019.
-Check branch experimental-geoip2 for an up-to-date and working version with GeoLite2.
 
 ## README
 
@@ -21,7 +17,7 @@ This is a slightly modified version of https://github.com/georgyo/ifconfig.io :
 Build instruction :
 * install golang-go and libgeoip-dev
 * git clone https://github.com/pfoo/ifconfig.pm.git
-* git checkout experimental-geogo
+* git checkout experimental-geoip2
 * cd ifconfig.pm
 * export GOPATH="`pwd`"
 * go get -d -v
@@ -33,9 +29,7 @@ A few parameters can be defined using export before launching the binary :
 * export HOST="127.0.0.1"
 
 Required for ip country and asn support :
-* apt-get install geoip-bin geoip-database-contrib
-* geoip-database-contrib_update
-* You might need to adjust geoip databases location in main.go (lines 20-23) if you are not running debian
+* Download databases from https://dev.maxmind.com/geoip/geoip2/geolite2/ and place GeoLite2-Country.mmdb and GeoLite2-ASN.mmdb on the same directory than the binary.
 
 Running behind a proxy (usefull if you already have a webserver running on port 80) :
 * Run the go program on 127.0.0.1:8081

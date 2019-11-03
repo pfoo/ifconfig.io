@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/http/fcgi"
 	"os"
+	"log"
 	"path"
 	"strconv"
 	"strings"
@@ -14,14 +15,31 @@ import (
 	"github.com/brandfolder/gin-gorelic"
 	"github.com/coreos/go-systemd/activation"
 	"github.com/gin-gonic/gin"
-	"github.com/pfoo/geoip"
+	"github.com/oschwald/maxminddb-golang"
 )
 
-// Those files are provided by debian/ubuntu package geoip-database-contrib (geoip-database or geoip-database-extra wont work)
-var gi, gierr = geoip.Open("/usr/share/GeoIP/GeoIP.dat")
-var gi6, gi6err = geoip.Open("/usr/share/GeoIP/GeoIPv6.dat")
-var giasn, giasnerr = geoip.Open("/usr/share/GeoIP/GeoIPASNum.dat")
-var giasn6, giasn6err = geoip.Open("/usr/share/GeoIP/GeoIPASNumv6.dat")
+// open geolite country database (download from https://dev.maxmind.com/geoip/geoip2/geolite2/)
+var DBCountry, DBCountryerr = maxminddb.Open("GeoLite2-Country.mmdb")
+
+// open geolite ASN database (download from https://dev.maxmind.com/geoip/geoip2/geolite2/)
+var DBASN, DBASNerr = maxminddb.Open("GeoLite2-ASN.mmdb")
+
+// struct for country db
+var RecordCountry struct {
+	Country struct {
+		ISOCode string `maxminddb:"iso_code"` // get country iso code
+		Names struct {
+			Name string `maxminddb:"en"` // get country name in english (en)
+		} `maxminddb:"names"`
+	} `maxminddb:"country"`
+
+}
+
+// struct for asn db
+var RecordASN struct {
+	ASNumber int `maxminddb:"autonomous_system_number"`
+	ASName string `maxminddb:"autonomous_system_organization"`
+}
 
 // Logger is a simple log handler, out puts in the standard of apache access log common.
 // See http://httpd.apache.org/docs/2.2/logs.html#accesslog
@@ -95,29 +113,18 @@ func mainHandler(c *gin.Context) {
 		ConnectionHeader = cfCONN
 	}
 
-	//  AS Number and country name stuff
+	// AS number and country name stuff
 	var geoip_country, geoip_asn string
-	if strings.Contains(ip.IP.String(), ".") {
-		country, netmask := gi.GetCountryName(ip.IP.String())
-		if netmask != 0 {
-			geoip_country = country
-		}
-		asn, netmask := giasn.GetName(ip.IP.String())
-		if netmask != 0 {
-			geoip_asn = asn
-		}
-	} else {
-		country, netmask := gi6.GetCountryName_v6(ip.IP.String())
-		if netmask != 0 {
-			geoip_country = country
-		}
-		asn, netmask := giasn6.GetNameV6(ip.IP.String())
-		if netmask != 0 {
-			geoip_asn = asn
-		}
+	err = DBCountry.Lookup(ip.IP, &RecordCountry)
+	if err != nil {
+		log.Fatal(err)
 	}
-	//print(geoip_country)
-	//print(geoip_asn)
+	geoip_country = RecordCountry.Country.Names.Name
+	err = DBASN.Lookup(ip.IP, &RecordASN)
+	if err != nil {
+		log.Fatal(err)
+	}
+	geoip_asn = RecordASN.ASName+" (AS"+strconv.Itoa(RecordASN.ASNumber)+")"
 
 	// Use CF-Protocol header as protocol if available instead default gathered protocol (this means app is invoked behind a proxy)
 	Protocol := c.Request.Proto
@@ -219,22 +226,17 @@ func FileServer(root string) gin.HandlerFunc {
 
 func main() {
 
-	if gierr != nil {
-		fmt.Fprintf(os.Stderr, "error: Could not open GeoIP database: %v\n")
+	if DBCountryerr != nil {
+		log.Fatal(DBCountryerr)
 		os.Exit(1)
 	}
-	if gi6err != nil {
-		fmt.Fprintf(os.Stderr, "error: Could not open GeoIPv6 database: %v\n")
+	defer DBCountry.Close()
+
+	if DBASNerr != nil {
+		log.Fatal(DBASNerr)
 		os.Exit(1)
 	}
-	if giasnerr != nil {
-		fmt.Fprintf(os.Stderr, "error: Could not open GeoIP ASN database: %v\n")
-		os.Exit(1)
-	}
-	if giasn6err != nil {
-		fmt.Fprintf(os.Stderr, "error: Could not open GeoIPv6 ASN database: %v\n")
-		os.Exit(1)
-	}
+	defer DBASN.Close()
 
 	r := gin.New()
 	r.Use(gin.Recovery())

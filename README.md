@@ -6,6 +6,9 @@
 * Provide ASN using geogo (from https://github.com/pfoo/geoip)
 * use real protocol if running behind a proxy
 
+Please note that as GeoIP / GeoLite Legacy databases are no more provided by MaxMind as off 2019.
+Check branch experimental-geoip2 for an up-to-date and working version with GeoLite2.
+
 ## README
 
 This is a slightly modified version of https://github.com/georgyo/ifconfig.io :

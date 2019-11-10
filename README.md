@@ -1,10 +1,6 @@
 
 # ifconfig.pm
 
-## What's new in this branch ?
-* Uses MaxMind GeoLite2 (via https://github.com/oschwald/maxminddb-golang) in order to provide GeoIP Country and ASN.
-* Show real protocol if running behind a proxy
-
 ## README
 
 This is a slightly modified version of https://github.com/georgyo/ifconfig.io :
@@ -12,12 +8,11 @@ This is a slightly modified version of https://github.com/georgyo/ifconfig.io :
 * Added Protocol field and a way of displaying the original protocol if running behind a proxy 
 * Added a way to support real client port when the app is run behind a proxy
 * wget and fetch are treated like curl (providing value without html formating)
-* show IP country and AS name/number based on Maxmind geolite free database using https://github.com/oschwald/maxminddb-golang
+* show IP country and AS name/number based on MaxMind GeoLite2 free database using https://github.com/oschwald/maxminddb-golang
 
 Build instruction :
 * install golang-go
 * git clone https://github.com/pfoo/ifconfig.pm.git
-* git checkout experimental-geoip2
 * cd ifconfig.pm
 * export GOPATH="`pwd`"
 * go get -d -v

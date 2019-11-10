@@ -14,7 +14,7 @@ This is a slightly modified version of https://github.com/georgyo/ifconfig.io :
 * install golang-go
 * git clone https://github.com/pfoo/ifconfig.pm.git
 * cd ifconfig.pm
-* export GOPATH="`pwd`"
+* export GOPATH="$(pwd)"
 * go get -d -v
 * go build
 
@@ -43,6 +43,10 @@ Required for ip country and ASN support :
 #### Running behind systemd socket activation (see http://0pointer.de/blog/projects/socket-activation.html)
 * Run : systemd-socket-activate -l 8000 ./ifconfig.pm
 * systemd will listen on port 8000, start the program only when required and forward everything to it
+* If everything is working, you can create two files in /etc/systemd/system/ in order to automatically launch the service :<br>
+	ifconfig.socket (see example file)<br>
+	ifconfig.service (see example file)<br>
+* Then execute `systemctl daemon-reload` and `systemctl start ifconfig.socket`
 
 #### ORIGINAL README FROM https://github.com/georgyo/ifconfig.io :
 

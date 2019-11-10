@@ -77,14 +77,6 @@ func stringInSlice(a string, list []string) bool {
 	return false
 }
 
-func testRemoteTCPPort(address string) bool {
-	_, err := net.DialTimeout("tcp", address, 3*time.Second)
-	if err != nil {
-		return false
-	}
-	return true
-}
-
 func mainHandler(c *gin.Context) {
 	fields := strings.Split(c.Params.ByName("field"), ".")
 	ip, err := net.ResolveTCPAddr("tcp", c.Request.RemoteAddr)
@@ -129,19 +121,6 @@ func mainHandler(c *gin.Context) {
 	Protocol := c.Request.Proto
 	if cfProto := c.Request.Header.Get("CF-Protocol"); cfProto != "" {
 		Protocol = cfProto
-	}
-
-	if fields[0] == "porttest" {
-		if len(fields) >= 2 {
-			if port, err := strconv.Atoi(fields[1]); err == nil && port > 0 && port <= 65535 {
-				c.String(200, fmt.Sprintln(testRemoteTCPPort(ip.IP.String()+":"+fields[1])))
-			} else {
-				c.String(400, "Invalid Port Number")
-			}
-		} else {
-			c.String(400, "Need Port")
-		}
-		return
 	}
 
 	c.Set("ip", ip.IP.String())

@@ -7,7 +7,6 @@ import (
 	"net/http/fcgi"
 	"os"
 	"log"
-	"path"
 	"strconv"
 	"strings"
 	"time"
@@ -188,18 +187,6 @@ func mainHandler(c *gin.Context) {
 	}
 	c.String(200, fmt.Sprintln(fieldResult))
 
-}
-
-// FileServer is a basic file serve handler, this is just here as an example.
-// gin.Static() should be used instead
-func FileServer(root string) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		file := c.Params.ByName("file")
-		if !strings.HasPrefix(file, "/") {
-			file = "/" + file
-		}
-		http.ServeFile(c.Writer, c.Request, path.Join(root, path.Clean(file)))
-	}
 }
 
 func main() {

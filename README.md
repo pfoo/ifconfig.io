@@ -3,7 +3,7 @@
 
 ## What's new in this branch ?
 * Uses MaxMind GeoLite2 (via https://github.com/oschwald/maxminddb-golang) in order to provide GeoIP Country and ASN.
-* use real protocol if running behind a proxy
+* Show real protocol if running behind a proxy
 
 ## README
 
@@ -12,10 +12,10 @@ This is a slightly modified version of https://github.com/georgyo/ifconfig.io :
 * Added Protocol field and a way of displaying the original protocol if running behind a proxy 
 * Added a way to support real client port when the app is run behind a proxy
 * wget and fetch are treated like curl (providing value without html formating)
-* show IP country and AS number based on Maxmind geolite free database, using https://github.com/abh/geoip
+* show IP country and AS name/number based on Maxmind geolite free database using https://github.com/oschwald/maxminddb-golang
 
 Build instruction :
-* install golang-go and libgeoip-dev
+* install golang-go
 * git clone https://github.com/pfoo/ifconfig.pm.git
 * git checkout experimental-geoip2
 * cd ifconfig.pm
@@ -28,7 +28,7 @@ A few parameters can be defined using export before launching the binary :
 * export PORT="8081"
 * export HOST="127.0.0.1"
 
-Required for ip country and asn support :
+Required for ip country and ASN support :
 * Download databases from https://dev.maxmind.com/geoip/geoip2/geolite2/ and place GeoLite2-Country.mmdb and GeoLite2-ASN.mmdb on the same directory than the binary.
 
 Running behind a proxy (usefull if you already have a webserver running on port 80) :

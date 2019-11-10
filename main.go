@@ -211,11 +211,7 @@ func main() {
 	r.GET("/:field", mainHandler)
 	r.GET("/", mainHandler)
 
-	// Create a listener for FCGI
-	fcgi_listen, err := net.Listen("tcp", "127.0.0.1:4000")
-	if err != nil {
-		panic(err)
-	}
+	// Used for FCGI listener and systemd socket
 	errc := make(chan error)
 	go func(errc chan error) {
 		for err := range errc {
@@ -223,11 +219,16 @@ func main() {
 		}
 	}(errc)
 
+	// Create the FCGI listener
+	fcgi_listen, err := net.Listen("tcp", "127.0.0.1:4000")
+	if err != nil {
+		panic(err)
+	}
 	go func(errc chan error) {
 		errc <- fcgi.Serve(fcgi_listen, r)
 	}(errc)
 
-	// Listen on whatever systemd tells us to.
+	// Create the systemd socket listener (port provided by systemd)
 	listeners, err := activation.Listeners()
 	if err != nil {
 		fmt.Printf("Could not get systemd listerns with err %q", err)
@@ -238,6 +239,7 @@ func main() {
 		}(errc)
 	}
 
+	// HTTP listener
 	port := os.Getenv("PORT")
 	host := os.Getenv("HOST")
 	if port == "" {

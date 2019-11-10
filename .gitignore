@@ -1,4 +1,4 @@
-*.css
-.sass-cache/
 src/
 ifconfig.pm
+GeoLite2-ASN.mmdb
+GeoLite2-Country.mmdb

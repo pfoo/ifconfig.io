@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/http/fcgi"
 	"os"
+	"log"
 	"path"
 	"strconv"
 	"strings"
@@ -14,7 +15,31 @@ import (
 	"github.com/brandfolder/gin-gorelic"
 	"github.com/coreos/go-systemd/activation"
 	"github.com/gin-gonic/gin"
+	"github.com/oschwald/maxminddb-golang"
 )
+
+// open geolite country database (download from https://dev.maxmind.com/geoip/geoip2/geolite2/)
+var DBCountry, DBCountryerr = maxminddb.Open("GeoLite2-Country.mmdb")
+
+// open geolite ASN database (download from https://dev.maxmind.com/geoip/geoip2/geolite2/)
+var DBASN, DBASNerr = maxminddb.Open("GeoLite2-ASN.mmdb")
+
+// struct for country db
+var RecordCountry struct {
+	Country struct {
+		ISOCode string `maxminddb:"iso_code"` // get country iso code
+		Names struct {
+			Name string `maxminddb:"en"` // get country name in english (en)
+		} `maxminddb:"names"`
+	} `maxminddb:"country"`
+
+}
+
+// struct for asn db
+var RecordASN struct {
+	ASNumber int `maxminddb:"autonomous_system_number"`
+	ASName string `maxminddb:"autonomous_system_organization"`
+}
 
 // Logger is a simple log handler, out puts in the standard of apache access log common.
 // See http://httpd.apache.org/docs/2.2/logs.html#accesslog
@@ -88,6 +113,25 @@ func mainHandler(c *gin.Context) {
 		ConnectionHeader = cfCONN
 	}
 
+	// AS number and country name stuff
+	var geoip_country, geoip_asn string
+	err = DBCountry.Lookup(ip.IP, &RecordCountry)
+	if err != nil {
+		log.Fatal(err)
+	}
+	geoip_country = RecordCountry.Country.Names.Name
+	err = DBASN.Lookup(ip.IP, &RecordASN)
+	if err != nil {
+		log.Fatal(err)
+	}
+	geoip_asn = RecordASN.ASName+" (AS"+strconv.Itoa(RecordASN.ASNumber)+")"
+
+	// Use CF-Protocol header as protocol if available instead default gathered protocol (this means app is invoked behind a proxy)
+	Protocol := c.Request.Proto
+	if cfProto := c.Request.Header.Get("CF-Protocol"); cfProto != "" {
+		Protocol = cfProto
+	}
+
 	if fields[0] == "porttest" {
 		if len(fields) >= 2 {
 			if port, err := strconv.Atoi(fields[1]); err == nil && port > 0 && port <= 65535 {
@@ -104,7 +148,7 @@ func mainHandler(c *gin.Context) {
 	c.Set("ip", ip.IP.String())
 	c.Set("port", ip.Port)
 	c.Set("ua", c.Request.UserAgent())
-	c.Set("protocol", c.Request.Proto)
+	c.Set("protocol", Protocol)
 	c.Set("lang", c.Request.Header.Get("Accept-Language"))
 	c.Set("encoding", c.Request.Header.Get("Accept-Encoding"))
 	c.Set("method", c.Request.Method)
@@ -114,10 +158,12 @@ func mainHandler(c *gin.Context) {
 	c.Set("referer", c.Request.Header.Get("Referer"))
 	c.Set("via", c.Request.Header.Get("Via"))
 	c.Set("forwarded", c.Request.Header.Get("X-Forwarded-For"))
-	c.Set("country", c.Request.Header.Get("CF-IPCountry"))
+	//c.Set("country", c.Request.Header.Get("CF-IPCountry")) //determine country using provided header
+	c.Set("country", geoip_country)
 	r := strings.NewReplacer("0", "No", "1", "Yes")
 	c.Set("dnt", r.Replace(c.Request.Header.Get("DNT")))
 	c.Set("cache", c.Request.Header.Get("cache-control"))
+	c.Set("asn", geoip_asn)
 
 	ua := strings.Split(c.Request.UserAgent(), "/")
 
@@ -179,6 +225,19 @@ func FileServer(root string) gin.HandlerFunc {
 }
 
 func main() {
+
+	if DBCountryerr != nil {
+		log.Fatal(DBCountryerr)
+		os.Exit(1)
+	}
+	defer DBCountry.Close()
+
+	if DBASNerr != nil {
+		log.Fatal(DBASNerr)
+		os.Exit(1)
+	}
+	defer DBASN.Close()
+
 	r := gin.New()
 	r.Use(gin.Recovery())
 	r.Use(Logger())

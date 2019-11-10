@@ -1,3 +1,2 @@
 Headers that still might be affected by proxy :
-* Protocol    HTTP/1.1  => %{SERVER_PROTOCOL}
 * Method    GET         => %{REQUEST_METHOD}

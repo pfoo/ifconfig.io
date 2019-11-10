@@ -10,7 +10,14 @@
   <body>
     <header class="page-header container">
       <a href="/" class="h1">
-        What is my ip address? - <small>ifconfig.pm</small>
+        What is my ip address? - <small>ifconfig.pm</small> -
+      </a>
+      <a href="http://ipv4.ifconfig.pm" class="h2">
+	IPv4 only
+      </a>
+      <a class="h2"> - </a>
+      <a href="http://ipv6.ifconfig.pm" class="h2">
+        IPv6 only
       </a>
     </header>
     <nav class="container"></nav>
@@ -28,6 +35,9 @@
           </li>
           <li class="list-group-item">
             <div class="col-sm-3">Country</div><div class="col-sm-9">{{ .country }}</div>
+          </li>
+          <li class="list-group-item">
+            <div class="col-sm-3">ASN</div><div class="col-sm-9">{{ .asn }}</div>
           </li>
           <li class="list-group-item">
             <div class="col-sm-3">User Agent</div><div class="col-sm-9">{{ .ua }}</div>
@@ -89,6 +99,9 @@
           </li>
           <li class="list-group-item">
             <div class="col-sm-4">$ curl ifconfig.pm/country</div><div class="col-sm-8">{{ .country }}</div>
+          </li>
+          <li class="list-group-item">
+            <div class="col-sm-4">$ curl ifconfig.pm/asn</div><div class="col-sm-8">{{ .asn }}</div>
           </li>
           <li class="list-group-item">
             <div class="col-sm-4">$ curl ifconfig.pm/ua</div><div class="col-sm-8">{{ .ua }}</div>

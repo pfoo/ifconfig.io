@@ -220,7 +220,11 @@ func main() {
 	}(errc)
 
 	// Create the FCGI listener
-	fcgi_listen, err := net.Listen("tcp", "127.0.0.1:4000")
+	fcgiPort := os.Getenv("FCGI_PORT")
+	fcgiHost := os.Getenv("FCGI_HOST")
+	if fcgiPort == "" { fcgiPort = "4000"; }
+	if fcgiHost == "" { fcgiHost = "127.0.0.1"; }
+	fcgi_listen, err := net.Listen("tcp", fcgiHost + ":" + fcgiPort)
 	if err != nil {
 		panic(err)
 	}
@@ -242,8 +246,6 @@ func main() {
 	// HTTP listener
 	port := os.Getenv("PORT")
 	host := os.Getenv("HOST")
-	if port == "" {
-		port = "8080"
-	}
+	if port == "" { port = "8080"; }
 	errc <- r.Run(host + ":" + port)
 }

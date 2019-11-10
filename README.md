@@ -40,6 +40,10 @@ Running behind an FCGI proxy :
 * Use apache mod_proxy_fcgi to proxy requests from apache to fcgi://127.0.0.1:4000/
 * See example apache.fcgi.conf
 
+Running the program behind systemd socket activation (see http://0pointer.de/blog/projects/socket-activation.html)
+* Run : systemd-socket-activate -l 8000 ./ifconfig.pm
+* systemd will listen on port 8000, start the program only when required and forward everything to it
+
 #### ORIGINAL README FROM https://github.com/georgyo/ifconfig.io :
 
 Inspired by ifconfig.me, but designed for pure speed. A single server can do 18,000 requests per seconds while only consuming 50megs of ram.

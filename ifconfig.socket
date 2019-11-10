@@ -1,0 +1,6 @@
+[Socket]
+ListenStream = 8000
+BindIPv6Only = both
+
+[Install]
+WantedBy = sockets.target

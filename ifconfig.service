@@ -1,0 +1,5 @@
+[Unit]
+Description = ifconfig web service
+
+[Service]
+ExecStart = /path/to/ifconfig/binary

@@ -10,7 +10,7 @@ This is a slightly modified version of https://github.com/georgyo/ifconfig.io :
 * wget and fetch are treated like curl (providing value without html formating)
 * show IP country and AS name/number based on MaxMind GeoLite2 free database using https://github.com/oschwald/maxminddb-golang
 
-Build instruction :
+#### Build instruction :
 * install golang-go
 * git clone https://github.com/pfoo/ifconfig.pm.git
 * cd ifconfig.pm
@@ -26,7 +26,7 @@ A few parameters can be defined using export before launching the binary :
 Required for ip country and ASN support :
 * Download databases from https://dev.maxmind.com/geoip/geoip2/geolite2/ and place GeoLite2-Country.mmdb and GeoLite2-ASN.mmdb on the same directory than the binary.
 
-Running behind an HTTP proxy (usefull if you already have a webserver running on port 80) :
+#### Running behind an HTTP proxy (usefull if you already have a webserver running on port 80) :
 * Run the go program on 127.0.0.1:8081
 * Use apache mod_proxy_http to proxy requests from apache to http://127.0.0.1:8081/
 * Add followings headers to the proxyfied requests :<br>
@@ -36,11 +36,11 @@ Running behind an HTTP proxy (usefull if you already have a webserver running on
 	CF-Protocol : The HTTP protocol the client is connecting with. Important or the displayed protocol will be wrong.<br>
 * See example apache.http.conf
 
-Running behind an FCGI proxy :
+#### Running behind an FCGI proxy :
 * Use apache mod_proxy_fcgi to proxy requests from apache to fcgi://127.0.0.1:4000/
 * See example apache.fcgi.conf
 
-Running the program behind systemd socket activation (see http://0pointer.de/blog/projects/socket-activation.html)
+#### Running behind systemd socket activation (see http://0pointer.de/blog/projects/socket-activation.html)
 * Run : systemd-socket-activate -l 8000 ./ifconfig.pm
 * systemd will listen on port 8000, start the program only when required and forward everything to it
 

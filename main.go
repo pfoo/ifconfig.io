@@ -292,11 +292,24 @@ func main() {
 		httpHost := os.Getenv("HTTP_HOST")
 		if httpPort == "" { httpPort = "8080" }
 		log.Printf("Starting HTTP thread with IP %v and port %v", httpHost, httpPort)
+		// Create the HTTP listener
+		httpListener, err := net.Listen("tcp", httpHost + ":" + httpPort)
+		if err != nil {
+			log.Panic(err)
+		}
+		defer httpListener.Close()
 		wg.Add(1) // add 1 goroutine to wait for
-		// HTTP listener goroutine
+		// HTTP goroutine
 		go func(errc chan error) {
 			defer wg.Done() // defer marking the goroutine as done
-			errc <- router.Run(httpHost + ":" + httpPort)
+			//errc <- http.Serve(httpListener, router) // start HTTP server with httpListener and router (gin) as handler
+			// HTTP server configuration goes here (handler, read/write timeout, ...)
+			httpServer := &http.Server{
+				Handler: router,
+			}
+			httpServer.SetKeepAlivesEnabled(true) // enable tcp keepalive for HTTP server
+			defer httpServer.Close()
+			errc <- httpServer.Serve(httpListener) // start HTTP server with httpListener using httpServer configuration (uses router (gin) as handler)
 		}(errc)
 	}
 

@@ -222,6 +222,7 @@ func main() {
 
 	// err chan used for FCGI/HTTP listener goroutines and systemd socket-based activation goroutine
 	errc := make(chan error)
+	defer close(errc)
 	go func(errc chan error) {
 		for err := range errc {
 			log.Panic(err)

@@ -206,19 +206,19 @@ func main() {
 	defer DBASN.Close()
 
 	// gin HTTP init with Recovery middleware and custom Logger
-	r := gin.New()
-	r.Use(gin.Recovery())
-	r.Use(Logger())
-//	r.LoadHTMLGlob("templates/*")
-	r.LoadHTMLFiles("templates/index.html")
+	router := gin.New()
+	router.Use(gin.Recovery())
+	router.Use(Logger())
+//	router.LoadHTMLGlob("templates/*")
+	router.LoadHTMLFiles("templates/index.html")
 
 	// GET requests to / or /whatever is handled by mainHandler()
-	r.GET("/:field", mainHandler)
-	r.GET("/", mainHandler)
+	router.GET("/:field", mainHandler)
+	router.GET("/", mainHandler)
 
 	// PUT requests to / or /whatever is handled by mainHandler()
-	//r.PUT("/:field", mainHandler)
-	//r.PUT("/", mainHandler)
+	//router.PUT("/:field", mainHandler)
+	//router.PUT("/", mainHandler)
 
 	// err chan used for FCGI/HTTP listener goroutines and systemd socket-based activation goroutine
 	errc := make(chan error)
@@ -243,18 +243,18 @@ func main() {
 	// goroutine for systemd socket-basec activation
 	// Don't scan for ProxyType as it's not necessary and won't be set when running behind systemd socket-based activation
 	// This goroutine won't actually start if not run behind systemd socket-based activation
-	listeners, err := activation.Listeners()
+	SystemdListeners, err := activation.Listeners()
 	if err != nil {
 		log.Printf("Could not get systemd listeners: %v", err)
 	}
-	for _, listener := range listeners {
+	for _, SystemdListener := range SystemdListeners {
 		log.Printf("Starting systemd socket-based activation thread")
 		UsingSystemd = true
 		wg.Add(1) // add 1 goroutine to wait for
 		// systemd socket-based activation goroutine
 		go func(errc chan error) {
 			defer wg.Done() // defer marking the goroutine as done
-			errc <- http.Serve(listener, r)
+			errc <- http.Serve(SystemdListener, router) // start systemd server with SystemdListener and router (gin) as handler
 		}(errc)
 	}
 
@@ -279,10 +279,10 @@ func main() {
 		}
 		defer fcgiListener.Close()
 		wg.Add(1) // add 1 goroutine to wait for
-		// FCGI listener goroutine
+		// FCGI goroutine
 		go func(errc chan error) {
 			defer wg.Done() // defer marking the goroutine as done
-			errc <- fcgi.Serve(fcgiListener, r)
+			errc <- fcgi.Serve(fcgiListener, router) // start FCGI server with fcgiListener and router (gin) as handler
 		}(errc)
 	}
 
@@ -296,7 +296,7 @@ func main() {
 		// HTTP listener goroutine
 		go func(errc chan error) {
 			defer wg.Done() // defer marking the goroutine as done
-			errc <- r.Run(httpHost + ":" + httpPort)
+			errc <- router.Run(httpHost + ":" + httpPort)
 		}(errc)
 	}
 

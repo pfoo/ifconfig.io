@@ -2,23 +2,24 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"net"
 	"net/http"
 	"net/http/fcgi"
 	"os"
-	"log"
 	"strconv"
 	"strings"
-	"time"
 	"sync"
+	"time"
+
 	"github.com/coreos/go-systemd/activation"
 	"github.com/gin-gonic/gin"
 	"github.com/oschwald/maxminddb-golang"
 )
 
 // Databases path (download from https://dev.maxmind.com/geoip/geoip2/geolite2/)
-var DBCountryPath = "GeoLite2-Country.mmdb"
-var DBASNPath = "GeoLite2-ASN.mmdb"
+var DBCountryPath = "/etc/ifconfig.pm/GeoLite2-Country.mmdb"
+var DBASNPath = "/etc/ifconfig.pm/GeoLite2-ASN.mmdb"
 
 // init global database variables for GeoIP
 var DBCountry *maxminddb.Reader
@@ -28,17 +29,16 @@ var DBASN *maxminddb.Reader
 var RecordCountry struct {
 	Country struct {
 		ISOCode string `maxminddb:"iso_code"` // get country iso code
-		Names struct {
+		Names   struct {
 			Name string `maxminddb:"en"` // get country name in english (en)
 		} `maxminddb:"names"`
 	} `maxminddb:"country"`
-
 }
 
 // struct for ASN database
 var RecordASN struct {
-	ASNumber int `maxminddb:"autonomous_system_number"`
-	ASName string `maxminddb:"autonomous_system_organization"`
+	ASNumber int    `maxminddb:"autonomous_system_number"`
+	ASName   string `maxminddb:"autonomous_system_organization"`
 }
 
 // Logger is a simple log handler, outputs in the standard of apache commn access log
@@ -109,12 +109,12 @@ func mainHandler(c *gin.Context) {
 	if err != nil {
 		log.Panic(err)
 	}
-	GeoIPCountry = RecordCountry.Country.Names.Name+" ("+RecordCountry.Country.ISOCode+")"
+	GeoIPCountry = RecordCountry.Country.Names.Name + " (" + RecordCountry.Country.ISOCode + ")"
 	err = DBASN.Lookup(ip.IP, &RecordASN)
 	if err != nil {
 		log.Panic(err)
 	}
-	GeoIPASN = RecordASN.ASName+" (AS"+strconv.Itoa(RecordASN.ASNumber)+")"
+	GeoIPASN = RecordASN.ASName + " (AS" + strconv.Itoa(RecordASN.ASNumber) + ")"
 
 	// Use CF-Protocol header as protocol if available instead default gathered protocol (this means app is invoked behind an HTTP proxy)
 	Protocol := c.Request.Proto
@@ -168,9 +168,9 @@ func mainHandler(c *gin.Context) {
 			c.HTML(200, "index.html", c.Keys)
 		}
 		return
-//	case "request":
-//		c.JSON(200, c.Request)
-//		return
+		//	case "request":
+		//		c.JSON(200, c.Request)
+		//		return
 	case "all":
 		if wantsJSON {
 			c.JSON(200, c.Keys)
@@ -209,7 +209,7 @@ func main() {
 	router := gin.New()
 	router.Use(gin.Recovery())
 	router.Use(Logger())
-//	router.LoadHTMLGlob("templates/*")
+	//	router.LoadHTMLGlob("templates/*")
 	router.LoadHTMLFiles("templates/index.html")
 
 	// GET requests to / or /whatever is handled by mainHandler()
@@ -234,7 +234,7 @@ func main() {
 
 	// If PROXY_TYPE environement variable is set, ensure it is either FCGI, HTTP or BOTH
 	ProxyType := os.Getenv("PROXY_TYPE")
-	if ProxyType != "" && strings.EqualFold(ProxyType, "FCGI") == false && strings.EqualFold(ProxyType, "HTTP") == false && strings.EqualFold(ProxyType, "BOTH") == false {
+	if ProxyType != "" && !strings.EqualFold(ProxyType, "FCGI") && !strings.EqualFold(ProxyType, "HTTP") && !strings.EqualFold(ProxyType, "BOTH") {
 		log.Fatalf("Fatal: PROXY_TYPE environement variable must be either FCGI, HTTP or BOTH. Current is %v. Exiting.", ProxyType)
 	}
 
@@ -253,15 +253,15 @@ func main() {
 		UsingSystemd = true
 		wg.Add(1) // add 1 goroutine to wait for
 		// systemd socket-based activation goroutine
-		go func(errc chan error) {
-			defer wg.Done() // defer marking the goroutine as done
+		go func(SystemdListener net.Listener, errc chan error) {
+			defer wg.Done()                             // defer marking the goroutine as done
 			errc <- http.Serve(SystemdListener, router) // start systemd server with SystemdListener and router (gin) as handler
-		}(errc)
+		}(SystemdListener, errc)
 	}
 
 	// If PROXY_TYPE environement variable is not set AND we are not using systemd sockets-based activation, we default to HTTP proxy
 	// This allows a default-proxy-mode operation but also prevents defaulting to this proxy type if ran for systemd but systemd goroutine crashed on startup
-	if ProxyType == "" && UsingSystemd == false {
+	if ProxyType == "" && !UsingSystemd {
 		log.Printf("PROXY_TYPE environement variable is not set, defaulting to HTTP proxy.")
 		ProxyType = "HTTP"
 	}
@@ -270,11 +270,15 @@ func main() {
 	if strings.EqualFold(ProxyType, "FCGI") || strings.EqualFold(ProxyType, "BOTH") { // strings.EqualFold() allows case insensitive comparison and is more efficient than strings.ToLower=strings.ToLower comparison (https://blog.digitalocean.com/how-to-efficiently-compare-strings-in-go/)
 		fcgiPort := os.Getenv("FCGI_PORT")
 		fcgiHost := os.Getenv("FCGI_HOST")
-		if fcgiPort == "" { fcgiPort = "4000" }
-		if fcgiHost == "" { fcgiHost = "127.0.0.1" }
+		if fcgiPort == "" {
+			fcgiPort = "4000"
+		}
+		if fcgiHost == "" {
+			fcgiHost = "127.0.0.1"
+		}
 		log.Printf("Starting FCGI thread with IP %v and port %v", fcgiHost, fcgiPort)
 		// Create the FCGI listener
-		fcgiListener, err := net.Listen("tcp", fcgiHost + ":" + fcgiPort)
+		fcgiListener, err := net.Listen("tcp", fcgiHost+":"+fcgiPort)
 		if err != nil {
 			log.Panic(err)
 		}
@@ -282,7 +286,7 @@ func main() {
 		wg.Add(1) // add 1 goroutine to wait for
 		// FCGI goroutine
 		go func(errc chan error) {
-			defer wg.Done() // defer marking the goroutine as done
+			defer wg.Done()                          // defer marking the goroutine as done
 			errc <- fcgi.Serve(fcgiListener, router) // start FCGI server with fcgiListener and router (gin) as handler
 		}(errc)
 	}
@@ -291,10 +295,12 @@ func main() {
 	if strings.EqualFold(ProxyType, "HTTP") || strings.EqualFold(ProxyType, "BOTH") { // strings.EqualFold() allows case insensitive comparison and is more efficient than strings.ToLower=strings.ToLower comparison (https://blog.digitalocean.com/how-to-efficiently-compare-strings-in-go/)
 		httpPort := os.Getenv("HTTP_PORT")
 		httpHost := os.Getenv("HTTP_HOST")
-		if httpPort == "" { httpPort = "8080" }
+		if httpPort == "" {
+			httpPort = "8080"
+		}
 		log.Printf("Starting HTTP thread with IP %v and port %v", httpHost, httpPort)
 		// Create the HTTP listener
-		httpListener, err := net.Listen("tcp", httpHost + ":" + httpPort)
+		httpListener, err := net.Listen("tcp", httpHost+":"+httpPort)
 		if err != nil {
 			log.Panic(err)
 		}
